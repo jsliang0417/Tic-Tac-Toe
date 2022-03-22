@@ -215,8 +215,6 @@ def print_board(game_board, b_choice, h_choice):
 
 def main():
     
-    
-    
     if args.method == "minimax":
         print("Using Minimax")
         while len(empty_cells(game_board)) > 0 and not game_over(game_board):
