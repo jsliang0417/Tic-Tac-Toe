@@ -97,22 +97,30 @@ def alphaBetaPruning(game_board, depth, turn, alpha, beta):
         x = i[0]
         y = i[1]
         game_board[x][y] = turn
-        x, y= alphaBetaPruning(game_board, depth-1, -turn, alpha, beta)
-        
-        if x > best:
-            best = x
-        if best > alpha:
-            alpha = best
-        if alpha > beta:
-            print("prune")
-            break
+        point = alphaBetaPruning(game_board, depth-1, -turn, alpha, beta)
+        game_board[x][y] = 0
+        point[0] = x
+        point[1] = y
+        if turn == bot:
+            if point[2] > best[2]:
+                best = point
+            if best[2] > beta:
+                return best
+            if alpha < best[2]:
+                alpha = best[2]
+        else:
+            if point[2] < best[2]:
+                best = point
+            if best[2] < alpha:
+                return best
+            if beta > best[2]:
+                beta = best[2]
         
     return best
 
 
-
-
 def victory(game_board, turn):
+    
     victory_case = [
         [game_board[0][0], game_board[0][1], game_board[0][2]],
         [game_board[1][0], game_board[1][1], game_board[1][2]],
@@ -121,9 +129,10 @@ def victory(game_board, turn):
         [game_board[0][1], game_board[1][1], game_board[2][1]],
         [game_board[0][2], game_board[1][2], game_board[2][2]],
         [game_board[0][0], game_board[1][1], game_board[2][2]],
-        [game_board[2][0], game_board[1][1], game_board[0][2]],
+        [game_board[2][0], game_board[1][1], game_board[0][2]]
     ]
     
+            
     if [turn, turn, turn] in victory_case:
         return True
     else:
@@ -174,7 +183,7 @@ def human_turn(b_choice, h_choice):
 
 
 
-def bot_turn(b_choice, h_choice):
+def bot_turn_minimax(b_choice, h_choice):
     depth = len(empty_cells(game_board))
     if depth == 0 or game_over(game_board):
         return
@@ -191,6 +200,27 @@ def bot_turn(b_choice, h_choice):
         y = move[1]
     
     update_move(x, y, bot)
+
+def bot_turn_abpruning(b_choice, h_choice):
+    alpha = -inf
+    beta = inf
+    depth = len(empty_cells(game_board))
+    if depth == 0 or game_over(game_board):
+        return
+    
+    print("Bot's turn: {0}".format(b_choice))
+    print_board(game_board, b_choice, h_choice)
+    
+    if depth == 9:
+        x = choice([0, 1, 2])
+        y = choice([0, 1, 2])
+    else:
+        move = alphaBetaPruning(game_board, depth, bot, alpha, beta)
+        x = move[0]
+        y = move[1]
+    
+    update_move(x, y, bot)
+
 
 
 def print_board(game_board, b_choice, h_choice):
@@ -219,7 +249,7 @@ def main():
         print("Using Minimax")
         while len(empty_cells(game_board)) > 0 and not game_over(game_board):
             human_turn(bot_choice, human_choice)
-            bot_turn(bot_choice, human_choice)
+            bot_turn_minimax(bot_choice, human_choice)
         
         if victory(game_board, human):
             print("Human's turn: {0}".format(human_choice))
@@ -236,6 +266,21 @@ def main():
     
     if args.method == "ab-pruning":
         print("Using Alpha-Beta Pruning")
+        while len(empty_cells(game_board)) > 0 and not game_over(game_board):
+            human_turn(bot_choice, human_choice)
+            bot_turn_abpruning(bot_choice, human_choice)
+        
+        if victory(game_board, human):
+            print("Human's turn: {0}".format(human_choice))
+            print_board(game_board, bot_choice, human_choice)
+            print("Human Win")
+        elif victory(game_board, bot):
+            print("Bot's turn: {0}".format(bot_choice))
+            print_board(game_board, bot_choice, human_choice)
+            print("Bot Win")
+        else:
+            print_board(game_board, bot_choice, human_choice)
+            print("Tie")
 
 
 
