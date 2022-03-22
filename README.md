@@ -15,10 +15,9 @@ Tic-Tac-Toe Project
 
     2. If you want to play against the AI with Alpha-Beta Pruning algorithm, then run:
     ```python
-        python3 Sudoku_solver.py --method ab-pruning
+        python3 main.py --method ab-pruning
     ```
 
-1. Remarks: If you choose AC3 as your preferred algorithm, there is a chance that this algorithm may not return a fully solved sudoku. The code will immediately solve the unsolved sudoku with Backtracking + Forward Checking algorithm.
 
 
 
