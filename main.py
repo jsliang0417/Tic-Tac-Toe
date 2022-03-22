@@ -1,6 +1,14 @@
 from math import inf
 from random import choice
+import argparse
 import time
+
+
+#parse argument
+parser = argparse.ArgumentParser()
+parser.add_argument("--method", help="minimax or alpha-beta pruning")
+args = parser.parse_args()
+
 
 
 human = -1
@@ -66,13 +74,39 @@ def minimax(game_board, depth, turn):
         game_board[x][y] = 0
         point[0] = x
         point[1] = y
-
         if turn == bot:
             if point[2] > best[2]:
                 best = point
         else:
             if point[2] < best[2]:
                 best = point
+    return best
+
+
+def alphaBetaPruning(game_board, depth, turn, alpha, beta):
+    if turn == bot:
+        best = [-1, -1, -inf]
+    else:
+        best = [-1, -1, inf]
+    
+    if depth == 0 or game_over(game_board):
+        point = analyze(game_board)
+        return [-1, -1, point]
+    
+    for i in empty_cells(game_board):
+        x = i[0]
+        y = i[1]
+        game_board[x][y] = turn
+        x, y= alphaBetaPruning(game_board, depth-1, -turn, alpha, beta)
+        
+        if x > best:
+            best = x
+        if best > alpha:
+            alpha = best
+        if alpha > beta:
+            print("prune")
+            break
+        
     return best
 
 
@@ -157,9 +191,6 @@ def bot_turn(b_choice, h_choice):
         y = move[1]
     
     update_move(x, y, bot)
-    time.sleep(1.5)
-
-    
 
 
 def print_board(game_board, b_choice, h_choice):
@@ -184,21 +215,29 @@ def print_board(game_board, b_choice, h_choice):
 
 def main():
     
-    while len(empty_cells(game_board)) > 0 and not game_over(game_board):
-        human_turn(bot_choice, human_choice)
-        bot_turn(bot_choice, human_choice)
+    
+    
+    if args.method == "minimax":
+        print("Using Minimax")
+        while len(empty_cells(game_board)) > 0 and not game_over(game_board):
+            human_turn(bot_choice, human_choice)
+            bot_turn(bot_choice, human_choice)
         
-    if victory(game_board, human):
-        print("Human's turn: {0}".format(human_choice))
-        print_board(game_board, bot_choice, human_choice)
-        print("Human Win")
-    elif victory(game_board, bot):
-        print("Bot's turn: {0}".format(bot_choice))
-        print_board(game_board, bot_choice, human_choice)
-        print("Bot Win")
-    else:
-        print_board(game_board, bot_choice, human_choice)
-        print("Tie")
+        if victory(game_board, human):
+            print("Human's turn: {0}".format(human_choice))
+            print_board(game_board, bot_choice, human_choice)
+            print("Human Win")
+        elif victory(game_board, bot):
+            print("Bot's turn: {0}".format(bot_choice))
+            print_board(game_board, bot_choice, human_choice)
+            print("Bot Win")
+        else:
+            print_board(game_board, bot_choice, human_choice)
+            print("Tie")
+    
+    
+    if args.method == "ab-pruning":
+        print("Using Alpha-Beta Pruning")
 
 
 
